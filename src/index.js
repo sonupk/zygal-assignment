@@ -5,26 +5,22 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const cookieParser = require('cookie-parser');
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+// Set up MongoDB connection
+mongoose.connect('mongodb://localhost/user_collection', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-let db;
 
-async function startServer() {
-  try {
-    const client = await MongoClient.connect('<URL>', {useUnifiedTopology: true});
-    db = client.db('login-system');
-    app.listen(3000, () => console.log('listening on 3000'));
-  } catch (error) {
-    console.error(error);
-  }
-}
 
-startServer();
 
 
 // Create the express app
 const app = express();
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 
 // Define the schema for the user collection
@@ -96,4 +92,9 @@ app.get('/', (req, res) => {
   app.post('/logout', (req, res) => {
     res.clearCookie('email');
     res.redirect('/');
+  });
+
+  // Start the server
+app.listen(3000, () => {
+    console.log('Server listening on port 3000');
   });
